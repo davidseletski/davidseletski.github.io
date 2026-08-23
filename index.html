@@ -1,3 +1,490 @@
-<body>
-<a>test1</a>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Siddur Live — Jewish prayer book app. Support the developer with a voluntary donation." />
+  <title>Siddur Live</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red-dark:   #8b0000;
+      --red-main:   #c0392b;
+      --red-light:  #e74c3c;
+      --gold:       #f0c040;
+      --gold-dark:  #c9972a;
+      --bg:         #0f0f0f;
+      --surface:    #1a1a1a;
+      --surface2:   #242424;
+      --text:       #f0ece4;
+      --text-muted: #9a958e;
+      --radius:     14px;
+      --shadow:     0 4px 24px rgba(0,0,0,.55);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Language switcher ────────────────────────────────────── */
+    .lang-bar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15,15,15,.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .lang-btn {
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .5px;
+    }
+
+    .lang-btn:hover { color: var(--text); border-color: var(--red-light); }
+    .lang-btn.active {
+      background: linear-gradient(135deg, var(--red-main), var(--red-dark));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 2px 12px rgba(192,57,43,.5);
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 56px 24px 40px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(139,0,0,.35) 0%, transparent 70%);
+    }
+
+    .logo-wrap {
+      width: 120px;
+      height: 120px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(192,57,43,.55), 0 0 0 3px rgba(192,57,43,.25);
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .logo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .hero-title {
+      font-size: clamp(2rem, 7vw, 3.2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(.9rem, 3vw, 1.1rem);
+      color: var(--text-muted);
+      max-width: 520px;
+    }
+
+    /* Hebrew RTL adjustment for subtitle */
+    [dir="rtl"] .hero-subtitle { font-family: 'Frank Ruhl Libre', serif; }
+
+    /* ── Divider ──────────────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto 40px;
+      padding: 0 24px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(192,57,43,.6), transparent);
+    }
+    .divider span { color: var(--gold); font-size: 18px; }
+
+    /* ── Description ──────────────────────────────────────────── */
+    .description {
+      max-width: 600px;
+      margin: 0 auto 48px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .description p {
+      color: var(--text-muted);
+      font-size: clamp(.88rem, 2.5vw, 1rem);
+      line-height: 1.75;
+    }
+
+    .description p + p { margin-top: 12px; }
+
+    /* ── Donate section ───────────────────────────────────────── */
+    .donate-section {
+      max-width: 640px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 24px;
+      letter-spacing: .3px;
+    }
+
+    /* Grid of donation cards */
+    .donate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .donate-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 16px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text);
+      transition: all .25s;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .donate-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(192,57,43,.5);
+      box-shadow: 0 8px 32px rgba(192,57,43,.3);
+      background: var(--surface2);
+    }
+
+    .donate-card:active { transform: translateY(0); }
+
+    .donate-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .donate-name {
+      font-size: .88rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .donate-desc {
+      font-size: .75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Per-platform colors */
+    .icon-yoomoney  { background: #6200ea; color: #fff; }
+    .icon-tinkoff   { background: #ffdd2d; color: #000; }
+    .icon-boosty    { background: #f7682f; color: #fff; }
+    .icon-patreon   { background: #ff424d; color: #fff; }
+    .icon-kofi      { background: #29abe0; color: #fff; }
+    .icon-paypal    { background: #003087; color: #fff; }
+
+    /* ── Thank-you ────────────────────────────────────────────── */
+    .thanks {
+      text-align: center;
+      padding: 0 24px 64px;
+    }
+
+    .thanks-box {
+      display: inline-block;
+      max-width: 480px;
+      background: linear-gradient(135deg, rgba(139,0,0,.25), rgba(139,0,0,.1));
+      border: 1px solid rgba(192,57,43,.3);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+
+    .thanks-emoji { font-size: 36px; margin-bottom: 10px; }
+
+    .thanks-text {
+      color: var(--text-muted);
+      font-size: clamp(.85rem, 2.5vw, .96rem);
+      line-height: 1.7;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,.07);
+      padding: 20px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .78rem;
+    }
+
+    footer a { color: var(--red-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── i18n visibility ──────────────────────────────────────── */
+    [data-lang] { display: none; }
+    .lang-en [data-lang="en"],
+    .lang-ru [data-lang="ru"],
+    .lang-he [data-lang="he"] { display: block; }
+
+    /* Inline spans inside elements */
+    span[data-lang] { display: none; }
+    .lang-en span[data-lang="en"],
+    .lang-ru span[data-lang="ru"],
+    .lang-he span[data-lang="he"] { display: inline; }
+
+    /* RTL for Hebrew */
+    .lang-he { direction: rtl; }
+    .lang-he .hero-title,
+    .lang-he .section-title,
+    .lang-he .donate-name,
+    .lang-he .donate-desc { font-family: 'Frank Ruhl Libre', serif; }
+
+    /* ── Responsive tweaks ────────────────────────────────────── */
+    @media (max-width: 400px) {
+      .donate-grid { grid-template-columns: repeat(2, 1fr); }
+      .logo-wrap { width: 96px; height: 96px; }
+    }
+
+    @media (min-width: 640px) {
+      .hero { padding: 72px 32px 48px; }
+      .logo-wrap { width: 140px; height: 140px; border-radius: 32px; }
+    }
+  </style>
+</head>
+
+<body class="lang-en">
+
+  <!-- ── Language Bar ── -->
+  <nav class="lang-bar" aria-label="Language selector">
+    <button class="lang-btn active" onclick="setLang('en')" aria-label="English">EN</button>
+    <button class="lang-btn"        onclick="setLang('ru')" aria-label="Русский">RU</button>
+    <button class="lang-btn"        onclick="setLang('he')" aria-label="עברית">עב</button>
+  </nav>
+
+  <main>
+
+    <!-- ── Hero ── -->
+    <section class="hero">
+      <div class="logo-wrap">
+        <img src="resources/LOGO.png" alt="Siddur Live logo" width="140" height="140" />
+      </div>
+      <h1 class="hero-title">Siddur Live</h1>
+      <p class="hero-subtitle">
+        <span data-lang="en">A Jewish prayer book in your pocket — free, always with you.</span>
+        <span data-lang="ru">Еврейский молитвенник в вашем кармане — бесплатно, всегда с вами.</span>
+        <span data-lang="he">סידור יהודי בכיס שלך — חינם, תמיד איתך.</span>
+      </p>
+    </section>
+
+    <!-- ── Divider ── -->
+    <div class="divider" role="separator"><span>✡</span></div>
+
+    <!-- ── App description ── -->
+    <div class="description">
+      <div data-lang="en">
+        <p>Siddur Live is a free mobile prayer app with daily prayers, Shabbat and holiday liturgy, transliterations and translations — available on Android.</p>
+        <p>The app is completely free. Your voluntary donation helps keep it alive and supports ongoing development. Thank you. 🙏</p>
+      </div>
+      <div data-lang="ru">
+        <p>Siddur Live — бесплатное мобильное приложение с ежедневными молитвами, текстами на Шаббат и праздники, транслитерацией и переводами — доступно на Android.</p>
+        <p>Приложение полностью бесплатно. Ваше добровольное пожертвование помогает поддерживать его и развивать. Спасибо. 🙏</p>
+      </div>
+      <div data-lang="he">
+        <p>Siddur Live — אפליקציית תפילה חינמית לנייד עם תפילות יומיות, ליטורגיה לשבת ולחגים, תעתיקים ותרגומים — זמינה ל-Android.</p>
+        <p>האפליקציה חינמית לחלוטין. תרומתך הרצונית מסייעת לשמור עליה פעילה ולפתח אותה. תודה. 🙏</p>
+      </div>
+    </div>
+
+    <!-- ── Donate ── -->
+    <section class="donate-section" aria-labelledby="donate-heading">
+
+      <h2 class="section-title" id="donate-heading">
+        <span data-lang="en">💛 Support the Project</span>
+        <span data-lang="ru">💛 Поддержать проект</span>
+        <span data-lang="he">💛 תמוך בפרויקט</span>
+      </h2>
+
+      <div class="donate-grid">
+
+        <!-- YooMoney -->
+        <a href="https://yoomoney.ru/to/YOUR_ID" target="_blank" rel="noopener noreferrer" class="donate-card" aria-label="Donate via YooMoney">
+          <div class="donate-icon icon-yoomoney">₽</div>
+          <span class="donate-name">ЮMoney</span>
+          <span class="donate-desc">
+            <span data-lang="en">Russian e-wallet</span>
+            <span data-lang="ru">Электронный кошелёк</span>
+            <span data-lang="he">ארנק אלקטרוני</span>
+          </span>
+        </a>
+
+        <!-- Tinkoff -->
+        <a href="https://www.tinkoff.ru/cf/YOUR_ID" target="_blank" rel="noopener noreferrer" class="donate-card" aria-label="Donate via Tinkoff">
+          <div class="donate-icon icon-tinkoff">T</div>
+          <span class="donate-name">Тинькофф</span>
+          <span class="donate-desc">
+            <span data-lang="en">Bank transfer</span>
+            <span data-lang="ru">Банковский перевод</span>
+            <span data-lang="he">העברה בנקאית</span>
+          </span>
+        </a>
+
+        <!-- Boosty -->
+        <a href="https://boosty.to/YOUR_ID" target="_blank" rel="noopener noreferrer" class="donate-card" aria-label="Donate via Boosty">
+          <div class="donate-icon icon-boosty">B</div>
+          <span class="donate-name">Boosty</span>
+          <span class="donate-desc">
+            <span data-lang="en">Subscription support</span>
+            <span data-lang="ru">Подписка / разово</span>
+            <span data-lang="he">תמיכה חודשית</span>
+          </span>
+        </a>
+
+        <!-- Patreon -->
+        <a href="https://patreon.com/YOUR_ID" target="_blank" rel="noopener noreferrer" class="donate-card" aria-label="Donate via Patreon">
+          <div class="donate-icon icon-patreon">P</div>
+          <span class="donate-name">Patreon</span>
+          <span class="donate-desc">
+            <span data-lang="en">Monthly patronage</span>
+            <span data-lang="ru">Ежемесячная поддержка</span>
+            <span data-lang="he">חסות חודשית</span>
+          </span>
+        </a>
+
+        <!-- Ko-fi -->
+        <a href="https://ko-fi.com/YOUR_ID" target="_blank" rel="noopener noreferrer" class="donate-card" aria-label="Donate via Ko-fi">
+          <div class="donate-icon icon-kofi">☕</div>
+          <span class="donate-name">Ko-fi</span>
+          <span class="donate-desc">
+            <span data-lang="en">Buy me a coffee</span>
+            <span data-lang="ru">Угостить кофе</span>
+            <span data-lang="he">קנה לי קפה</span>
+          </span>
+        </a>
+
+        <!-- PayPal -->
+        <a href="https://paypal.me/YOUR_ID" target="_blank" rel="noopener noreferrer" class="donate-card" aria-label="Donate via PayPal">
+          <div class="donate-icon icon-paypal">PP</div>
+          <span class="donate-name">PayPal</span>
+          <span class="donate-desc">
+            <span data-lang="en">International transfer</span>
+            <span data-lang="ru">Международный перевод</span>
+            <span data-lang="he">העברה בינלאומית</span>
+          </span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ── Thank you ── -->
+    <div class="thanks">
+      <div class="thanks-box">
+        <div class="thanks-emoji">🙏</div>
+        <p class="thanks-text">
+          <span data-lang="en">Every contribution, no matter how small, means the world. Thank you for supporting free Jewish software.</span>
+          <span data-lang="ru">Каждый вклад, даже небольшой, очень важен. Спасибо, что поддерживаете бесплатное еврейское приложение.</span>
+          <span data-lang="he">כל תרומה, קטנה כגדולה, חשובה מאוד. תודה שאתה תומך בתוכנה יהודית חינמית.</span>
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <p>
+      <span data-lang="en">© 2024 Siddur Live · Free app for Android ·
+        <a href="https://github.com/davidseletski/davidseletski.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </span>
+      <span data-lang="ru">© 2024 Siddur Live · Бесплатное приложение для Android ·
+        <a href="https://github.com/davidseletski/davidseletski.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </span>
+      <span data-lang="he">© 2024 Siddur Live · אפליקציה חינמית ל-Android ·
+        <a href="https://github.com/davidseletski/davidseletski.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </span>
+    </p>
+  </footer>
+
+  <!-- ── i18n script ── -->
+  <script>
+    function setLang(lang) {
+      // Update body class
+      document.body.className = document.body.className
+        .replace(/\blang-\w+\b/g, '')
+        .trim();
+      document.body.classList.add('lang-' + lang);
+
+      // Update html lang + dir attributes
+      document.documentElement.lang = lang;
+      document.documentElement.dir = (lang === 'he') ? 'rtl' : 'ltr';
+
+      // Update active button
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick') === "setLang('" + lang + "')");
+      });
+
+      // Persist choice
+      try { localStorage.setItem('siddur-lang', lang); } catch(e) {}
+    }
+
+    // Restore saved language or detect browser preference
+    (function () {
+      let saved;
+      try { saved = localStorage.getItem('siddur-lang'); } catch(e) {}
+      if (saved && ['en','ru','he'].includes(saved)) {
+        setLang(saved);
+        return;
+      }
+      const nav = (navigator.language || '').toLowerCase();
+      if (nav.startsWith('ru')) setLang('ru');
+      else if (nav.startsWith('he') || nav.startsWith('iw')) setLang('he');
+      else setLang('en');
+    })();
+  </script>
+
 </body>
+</html>
